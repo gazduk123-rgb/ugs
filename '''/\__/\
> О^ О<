@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гра Змійка</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        #score {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        canvas {
+            border: 4px solid #ffffff;
+            background-color: #000000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Гра Змійка</h1>
+    <div id="score">Рахунок: 0</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Розмір однієї клітинки (блоку)
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        // Змійка починає рух у центрі
+        let snake = [
+            { x: 10, y: 10 },
+            { x: 9, y: 10 },
+            { x: 8, y: 10 }
+        ];
+
+        // Їжа
+        let food = { x: 5, y: 5 };
+
+        // Напрямок руху (початковий — вправо)
+        let dx = 1;
+        let dy = 0;000000<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гра Змійка</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        #score {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        canvas {
+            border: 4px solid #ffffff;
+            background-color: #000000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Гра Змійка</h1>
+    <div id="score">Рахунок: 0</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Розмір однієї клітинки (блоку)
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        // Змійка починає рух у центрі
+        let snake = [
+            { x: 10, y: 10 },
+            { x: 9, y: 10 },
+            { x: 8, y: 10 }
+        ];
+
+        // Їжа
+        let food = { x: 5, y: 5 };
+
+        // Напрямок руху (початковий — вправо)
+        let dx = 1;
+        let dy = 0;
+
+        let score = 0;
+        let changingDirection = false; // Захист від подвійного натискання стрілок за один кадр
+
+        // Запуск гри (швидкість оновлення кадрів у мілісекундах)
+        let gameInterval = setInterval(main, 100);
+
+        function main() {
+            if (hasGameEnded()) {
+                clearInterval(gameInterval);
+                alert("Гра закінчена! Ваш рахунок: " + score);
+                document.location.reload();
+                return;
+            }
+
+            changingDirection = false;
+            clearCanvas();
+            drawFood();
+            moveSnake();
+            drawSnake();
+        }
+
+        // Очищення ігрового поля
+        function clearCanvas() {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Малювання змійки
+        function drawSnake() {
+            snake.forEach((part, index) => {
+                // Голова — зелена, тіло — світло-зелене
+                ctx.fillStyle = index === 0 ? "#4CAF50" : "#8BC34A";
+                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+            });
+        }
+
+        // Рух змійки
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+
+            // Перевірка, чи з'їла змійка їжу
+            const hasEatenFood = snake[0].x === food.x && snake[0].y === food.y;
+            if (hasEatenFood) {
+                score += 10;
+                document.getElementById("score").innerText = "Рахунок: " + score;
+                generateFood();
+            } else {
+                snake.pop(); // Видаляємо хвіст, якщо їжу не з'їдено
+            }
+        }
+
+        // Генерація нової їжі
+        function generateFood() {
+            food.x = Math.floor(Math.random() * tileCount);
+            food.y = Math.floor(Math.random() * tileCount);
+
+            // Перевірка, щоб їжа не з'явилася всередині змійки
+            snake.forEach(part => {
+                const hasEaten = part.x === food.x && part.y === food.y;
+                if (hasEaten) generateFood();
+            });
+        }
+
+        // Малювання їжі (червоне яблуко)
+        function drawFood() {
+            ctx.fillStyle = "#F44336";
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+        }
+
+        // Умови завершення гри (стіни або власний хвіст)
+        function hasGameEnded() {
+            const head = snake[0];
+
+            const hitLeftWall = head.x < 0;
+            const hitRightWall = head.x >= tileCount;
+            const hitToptWall = head.y < 0;
+            const hitBottomWall = head.y >= tileCount;
+
+            if (hitLeftWall || hitRightWall || hitToptWall || hitBottomWall) {
+                return true;
+            }
+
+            for (let i = 4; i < snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) return true;
+            }
+            return false;
+        }
+
+        // Керування клавішами
+        document.addEventListener("keydown", changeDirection);
+
+        function changeDirection(event) {
+            const keyPressed = event.keyCode;
+            const LEFT_KEY = 37;
+            const UP_KEY = 38;
+            const RIGHT_KEY = 39;
+            const DOWN_KEY = 40;
+
+            if (changingDirection) return;
+
+            const goingUp = dy === -1;
+            const goingDown = dy === 1;
+            const goingRight = dx === 1;
+            const goingLeft = dx === -1;
+
+            if (keyPressed === LEFT_KEY && !goingRight) {
+                dx = -1;
+                dy = 0;
+                changingDirection = true;
+            }
+            if (keyPressed === UP_KEY && !goingDown) {
+                dx = 0;
+                dy = -1;
+                changingDirection = true;
+            }
+            if (keyPressed === RIGHT_KEY && !goingLeft) {
+                dx = 1;
+                dy = 0;
+                changingDirection = true;
+            }
+            if (keyPressed === DOWN_KEY && !goingUp) {
+                dx = 0;
+                dy = 1;
+                changingDirection = true;
+            }
+        }
+    </script>
+</body>
+</html>
+
+        let score = 0;
+        let changingDirection = false; // Захист від подвійного натискання стрілок за один кадр
+
+        // Запуск гри (100
